@@ -1,8 +1,9 @@
 <?php echo $this->element('contact', array('plugin' => null)); ?>
-<?php $this->addScript($this->Html->css('/contact/css/contact.css')) ?>
+<?php 
+$this->Html->css('/contacts/css/contacts.css', null, array('inline' => false)); ?>
 <h2><?php echo $this->pageTitle = __d('contact', 'Contact', true) ?></h2>
 <?php
-echo $this->Form->create('Contact');
+echo $this->Form->create('Contact', array('class' => 'form-stacked'));
 echo $this->Form->input('name', array(
     'label' => 'Name',
     'error' => array(
