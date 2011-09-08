@@ -76,9 +76,6 @@ class ContactsController extends ContactAppController {
 		if(is_null($action)) $action = $this->action;
 		if(is_null($layout)) $layout = 'default';
 		
-		debug(func_get_args());
-		debug(array($action, $layout, $file, $themed));
-		
 		if (!is_null($themed) && file_exists(VIEWS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp')) {
 		  echo "file: 1";
 			if(is_null($file)) $file = VIEWS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp';
