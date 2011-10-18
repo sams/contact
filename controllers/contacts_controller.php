@@ -16,22 +16,24 @@ class ContactsController extends ContactAppController {
 	 * if you need to customize the contact form
 	 */
 	function add() {
-		if ($this->RequestHandler->isGet()) {
-			return parent::render($this->action, 'default', VIEWS . 'contact' . DS . $this->action . '.ctp');
+		if ($this->RequestHandler->isGet() && $this->RequestHandler->isAjax()) {
+			return $this->render($this->action, 'default', VIEWS . 'contact' . DS . $this->action . '.ctp');
 		}
 		
 		if(!empty($this->data)) {
 			$this->Contact->set($this->data);
 			if (!$this->Contact->validates()) {
-				return $this->Session->setFlash(
+				$this->Session->setFlash(
 					__d('contacts', "Please fill-in all required fields", true),
 					'message_notice');
+					return $this->render($this->action);
 			}
 	
 			if (!$this->Contact->save($this->data, false)) {
-				return $this->Session->setFlash(
+				$this->Session->setFlash(
 					__d('contacts', "An error occured while saving", true),
 					'message_error');
+					return $this->render($this->action);
 			}
 	
 			$this->Email->reset();
@@ -42,7 +44,7 @@ class ContactsController extends ContactAppController {
 			$this->Email->from = $this->data['Contact']['email'];
 			$this->Email->replyTo = $this->data['Contact']['email'];
 			$this->Email->subject = __d('contacts', 'New Contact', true);
-			$this->Email->template = 'add';
+			$this->Email->template = 'contact';
 			$this->Email->sendAs = 'text';
 			$this->set('contact', $this->data);
 			$this->Email->send();
@@ -77,13 +79,12 @@ class ContactsController extends ContactAppController {
 		if(is_null($layout)) $layout = 'default';
 		
 		if (!is_null($themed) && file_exists(VIEWS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp')) {
-		  echo "file: 1";
 			if(is_null($file)) $file = VIEWS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp';
 			return parent::render($action, $layout, $file);
 		}
-		if (!file_exists(VIEWS . 'contact' . DS . $this->action . '.ctp')) {
-		  echo "file: " . VIEWS . 'contact' . DS . $this->action . '.ctp';
-		  return false;
+		
+		if (file_exists(VIEWS . 'contact' . DS . $this->action . '.ctp')) {
+		  $file = VIEWS . 'contact' . DS . $this->action . '.ctp';
 		}
 		return parent::render($action, $layout, $file);
 	}
