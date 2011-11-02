@@ -17,21 +17,21 @@ class ContactsController extends ContactAppController {
 	 */
 	function add() {
 		if ($this->RequestHandler->isGet() && $this->RequestHandler->isAjax()) {
-			return $this->render($this->action, 'default', VIEWS . 'contact' . DS . $this->action . '.ctp');
+			return $this->render($this->action, 'default', APP . 'View' . DS . 'contact' . DS . $this->action . '.ctp');
 		}
 		
 		if(!empty($this->data)) {
 			$this->Contact->set($this->data);
 			if (!$this->Contact->validates()) {
 				$this->Session->setFlash(
-					__d('contacts', "Please fill-in all required fields", true),
+					__d('contacts', "Please fill-in all required fields"),
 					'message_notice');
 					return $this->render($this->action);
 			}
 	
 			if (!$this->Contact->save($this->data, false)) {
 				$this->Session->setFlash(
-					__d('contacts', "An error occured while saving", true),
+					__d('contacts', "An error occured while saving"),
 					'message_error');
 					return $this->render($this->action);
 			}
@@ -43,14 +43,14 @@ class ContactsController extends ContactAppController {
 			$this->Email->to = Configure::read('Contact.email');
 			$this->Email->from = $this->data['Contact']['email'];
 			$this->Email->replyTo = $this->data['Contact']['email'];
-			$this->Email->subject = __d('contacts', 'New Contact', true);
+			$this->Email->subject = __d('contacts', 'New Contact');
 			$this->Email->template = 'contact';
 			$this->Email->sendAs = 'text';
 			$this->set('contact', $this->data);
 			$this->Email->send();
 	
 			$this->Session->setFlash(
-				__d('contacts', 'Your message was sent successfully.', true),
+				__d('contacts', 'Your message was sent successfully.'),
 				'message_success');
 	
 			$this->redirect(array('action' => 'thanks'));
@@ -78,13 +78,13 @@ class ContactsController extends ContactAppController {
 		if(is_null($action)) $action = $this->action;
 		if(is_null($layout)) $layout = 'default';
 		
-		if (!is_null($themed) && file_exists(VIEWS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp')) {
-			if(is_null($file)) $file = VIEWS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp';
+		if (!is_null($themed) && file_exists(APP . 'View' . DS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp')) {
+			if(is_null($file)) $file = APP . 'View' . DS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp';
 			return parent::render($action, $layout, $file);
 		}
 		
-		if (file_exists(VIEWS . 'contact' . DS . $this->action . '.ctp')) {
-		  $file = VIEWS . 'contact' . DS . $this->action . '.ctp';
+		if (file_exists(APP . 'View' . DS . 'contact' . DS . $this->action . '.ctp')) {
+		  $file = APP . 'View' . DS . 'contact' . DS . $this->action . '.ctp';
 		}
 		return parent::render($action, $layout, $file);
 	}
