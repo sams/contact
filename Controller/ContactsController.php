@@ -1,53 +1,72 @@
 <?php
+App::uses('CakeEmail', 'Utility/Network');
 class ContactsController extends ContactAppController {
 	var $name = 'Contacts';
-	var $components = array('Email');
 
-	function beforeFilter() {
+	public function beforeFilter() {
 		parent::beforeFilter();
 		if (isset($this->Auth))
 		{
-			$this->Auth->allowedActions = array('*');
+			$this->Auth->allowedActions = array('add', 'thanks');
 		}
 	}
 
 	/**
-	 * You can create a view in app/views/plugins/contacts/contacts/add.ctp
+	 * You can create a view in APP Views/Plugin/contacts/add.ctp
 	 * if you need to customize the contact form
 	 */
-	function add() {
-		if ($this->RequestHandler->isGet() && $this->RequestHandler->isAjax()) {
-			return $this->render($this->action, 'default', APP . 'View' . DS . 'contact' . DS . $this->action . '.ctp');
+	public function admin_index() {
+		$this->Contact->recursive = 0;
+		$this->set('messages', $this->paginate());
+	}
+
+	/**
+	 * You can create a view in APP Views/Plugin/contacts/add.ctp
+	 * if you need to customize the contact form
+	 */
+	public function add() {
+		if ($this->request->is('get') && $this->request->is('ajax')) {
+			return $this->render($this->action, 'ajax');
 		}
 		
-		if(!empty($this->data)) {
-			$this->Contact->set($this->data);
+		if ($this->request->is('post')) {
 			if (!$this->Contact->validates()) {
 				$this->Session->setFlash(
 					__d('contacts', "Please fill-in all required fields"),
 					'message_notice');
 					return $this->render($this->action);
 			}
+			
+			$this->Contact->create();
+			if ($this->Contact->save($this->request->data)) {
+				$this->Session->setFlash(__('The message has been sent'));
+				$this->redirect(array('action' => 'index'));
+			} else {
+				$this->Session->setFlash(__('The message could not be sent. Please, try again.'));
+			}
 	
-			if (!$this->Contact->save($this->data, false)) {
+			if (!$this->Contact->save($this->request->data, false)) {
 				$this->Session->setFlash(
-					__d('contacts', "An error occured while saving"),
+					__d('contacts', "An error occured while sending"),
 					'message_error');
 					return $this->render($this->action);
 			}
-	
-			$this->Email->reset();
-			if (Configure::read('debug') > 0) {
-				$this->Email->delivery = 'debug';
-			}
-			$this->Email->to = Configure::read('Contact.email');
-			$this->Email->from = $this->data['Contact']['email'];
-			$this->Email->replyTo = $this->data['Contact']['email'];
-			$this->Email->subject = __d('contacts', 'New Contact');
-			$this->Email->template = 'contact';
-			$this->Email->sendAs = 'text';
-			$this->set('contact', $this->data);
-			$this->Email->send();
+			
+			// http://book.cakephp.org/2.0/en/core-utility-libraries/email.html?highlight=email#CakeEmail
+			
+			
+			// add html?
+			// beable to set template?
+			
+			$email = new CakeEmail();
+			$email->from($this->data['Contact']['email'], $this->data['Contact'][$this->Contact->displayField])
+			    ->sender('hello@ss44')
+			    //->template('welcome', 'fancy')
+			    ->emailFormat('html')
+			    ->replyTo($this->data['Contact']['email'])
+			    ->to(Configure::read('Contact.email'))
+			    ->subject(__d('contacts', 'New Contact'))
+			    ->send($this->request->data);
 	
 			$this->Session->setFlash(
 				__d('contacts', 'Your message was sent successfully.'),
@@ -63,7 +82,7 @@ class ContactsController extends ContactAppController {
 	 * Create a app/views/contact/thanks.ctp
 	 * to customize your thanks page
 	 */
-	function thanks() {
+	public function thanks() {
 		$this->render($this->action);
 	}
 	
@@ -78,15 +97,15 @@ class ContactsController extends ContactAppController {
 		if(is_null($action)) $action = $this->action;
 		if(is_null($layout)) $layout = 'default';
 		
-		if (!is_null($themed) && file_exists(APP . 'View' . DS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp')) {
-			if(is_null($file)) $file = APP . 'View' . DS . 'themed' . DS . $themed . DS . 'contact' . DS . $action . '.ctp';
+		if (!is_null($themed) && file_exists(APP . 'View' . DS . 'Themed' . DS . $themed . DS . 'Contact' . DS . $action . '.ctp')) {
+			if(is_null($file)) $file = APP . 'View' . DS . 'Themed' . DS . $themed . DS . 'Contact' . DS . $action . '.ctp';
 			return parent::render($action, $layout, $file);
 		}
-		
-		if (file_exists(APP . 'View' . DS . 'contact' . DS . $this->action . '.ctp')) {
-		  $file = APP . 'View' . DS . 'contact' . DS . $this->action . '.ctp';
+		echo APP . 'View' . DS . 'Contact' . DS . $this->action . '.ctp';
+		if (file_exists(APP . 'View' . DS . 'Contact' . DS . $this->action . '.ctp')) {
+		  $action = APP . 'View' . DS . 'Contact' . DS . $this->action . '.ctp';
 		}
-		return parent::render($action, $layout, $file);
+		return parent::render($action, $layout);
 	}
 }
 ?>
