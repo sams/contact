@@ -2,6 +2,7 @@
 App::uses('CakeEmail', 'Utility/Network');
 class ContactsController extends ContactAppController {
 	var $name = 'Contacts';
+	private $_formSender = null;
 
 	public function beforeFilter() {
 		parent::beforeFilter();
@@ -9,6 +10,17 @@ class ContactsController extends ContactAppController {
 		{
 			$this->Auth->allowedActions = array('add', 'thanks');
 		}
+		
+		if(!Configure::read('App.defaultEmail') && !Confifure::read('Contact.formSender')) {
+			$this->_formSender =  'noreply@' . env('HTTP_HOST');
+		} elseif(Configure::read('Contact.formSender')) {
+			$this->_formSender =  Configure::read('Contact.formSender');
+		} elseif(Configure::read('App.defaultEmail')) {
+			$this->_formSender =  Configure::read('App.defaultEmail');
+		} else {
+			// throw exception cause email aint configured
+		}
+		
 	}
 
 	/**
@@ -57,14 +69,15 @@ class ContactsController extends ContactAppController {
 			
 			// add html?
 			// beable to set template?
+			$emailCfg = Configure::read('Contact.emailCfg') ? Configure::read('Contact.emailCfg') : 'default';
 			
-			$email = new CakeEmail();
+			$email = new CakeEmail($emailCfg);
 			$email->from($this->data['Contact']['email'], $this->data['Contact'][$this->Contact->displayField])
-			    ->sender('no-reply@samsherlock.com')
+			    ->sender($this->_formSender)
 			    //->template('welcome', 'fancy')
-			    ->emailFormat('html')
+			    ->emailFormat(Configure::read('Contact.format'))
 			    ->replyTo($this->data['Contact']['email'])
-			    ->to(Configure::read('App.defaultEmail'))
+			    ->to(Configure::read('Contact.formTo'))
 			    ->subject(__d('contacts', 'New Contact'))
 			    ->send($this->request->data);
 	
