@@ -1,4 +1,3 @@
-<?php echo $this->element('contact', array('plugin' => null)); ?>
 <?php 
 $this->Html->css('/contacts/css/contacts.css', null, array('inline' => false)); ?>
 <h2><?php echo $this->pageTitle = __d('contact', 'Contact') ?></h2>

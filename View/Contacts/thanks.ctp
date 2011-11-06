@@ -1,4 +1,4 @@
-<?php echo $this->element('contact', array('plugin' => null)); ?>
+<p>Thanks</p>
 <?php
 $this->Html->css('/contacts/css/contacts.css', null, array('inline' => false));
 if (Configure::read('debug') > 0):
