@@ -30,6 +30,7 @@ class ContactsController extends ContactAppController {
 		}
 		
 		if ($this->request->is('post')) {
+			$this->Contact->set($this->request->data);
 			if (!$this->Contact->validates()) {
 				$this->Session->setFlash(
 					__d('contacts', "Please fill-in all required fields"),
@@ -40,7 +41,6 @@ class ContactsController extends ContactAppController {
 			$this->Contact->create();
 			if ($this->Contact->save($this->request->data)) {
 				$this->Session->setFlash(__('The message has been sent'));
-				$this->redirect(array('action' => 'index'));
 			} else {
 				$this->Session->setFlash(__('The message could not be sent. Please, try again.'));
 			}
@@ -60,19 +60,21 @@ class ContactsController extends ContactAppController {
 			
 			$email = new CakeEmail();
 			$email->from($this->data['Contact']['email'], $this->data['Contact'][$this->Contact->displayField])
-			    ->sender('hello@ss44')
+			    ->sender('no-reply@samsherlock.com')
 			    //->template('welcome', 'fancy')
 			    ->emailFormat('html')
 			    ->replyTo($this->data['Contact']['email'])
-			    ->to(Configure::read('Contact.email'))
+			    ->to(Configure::read('App.defaultEmail'))
 			    ->subject(__d('contacts', 'New Contact'))
 			    ->send($this->request->data);
 	
 			$this->Session->setFlash(
 				__d('contacts', 'Your message was sent successfully.'),
 				'message_success');
+			
+			$this->Session->write('Message.email', $this->request->data);
 	
-			$this->redirect(array('action' => 'thanks'));
+			$this->redirect(array('plugin' => 'contact', 'controller' => 'contacts', 'action' => 'thanks'));
 		} else {
 		  $this->render($this->action);
 		}
@@ -101,7 +103,6 @@ class ContactsController extends ContactAppController {
 			if(is_null($file)) $file = APP . 'View' . DS . 'Themed' . DS . $themed . DS . 'Contact' . DS . $action . '.ctp';
 			return parent::render($action, $layout, $file);
 		}
-		echo APP . 'View' . DS . 'Contact' . DS . $this->action . '.ctp';
 		if (file_exists(APP . 'View' . DS . 'Contact' . DS . $this->action . '.ctp')) {
 		  $action = APP . 'View' . DS . 'Contact' . DS . $this->action . '.ctp';
 		}
