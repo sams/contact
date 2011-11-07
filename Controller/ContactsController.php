@@ -66,10 +66,11 @@ class ContactsController extends ContactAppController {
 			
 			// http://book.cakephp.org/2.0/en/core-utility-libraries/email.html?highlight=email#CakeEmail
 			
+			$message = $this->_mkMsg($this->request->data['Contact']);
 			
-			// add html?
-			// beable to set template?
+			
 			$emailCfg = Configure::read('Contact.emailCfg') ? Configure::read('Contact.emailCfg') : 'default';
+			//diebug(Configure::read('Contact'));
 			
 			$email = new CakeEmail($emailCfg);
 			$email->from($this->data['Contact']['email'], $this->data['Contact'][$this->Contact->displayField])
@@ -79,13 +80,13 @@ class ContactsController extends ContactAppController {
 			    ->replyTo($this->data['Contact']['email'])
 			    ->to(Configure::read('Contact.formTo'))
 			    ->subject(__d('contacts', 'New Contact'))
-			    ->send($this->request->data);
+			    ->send($message);
 	
 			$this->Session->setFlash(
 				__d('contacts', 'Your message was sent successfully.'),
 				'message_success');
 			
-			$this->Session->write('Message.email', $this->request->data);
+			$this->Session->write('Message.email', $message);
 	
 			$this->redirect(array('plugin' => 'contact', 'controller' => 'contacts', 'action' => 'thanks'));
 		} else {
@@ -120,6 +121,20 @@ class ContactsController extends ContactAppController {
 		  $action = APP . 'View' . DS . 'Contact' . DS . $this->action . '.ctp';
 		}
 		return parent::render($action, $layout);
+	}
+	
+	private function _mkMsg($msg) {
+		//diebug($msg);
+		$View = new View($this);
+		$Html = $View->loadHelper('Html');
+		$msgString = $tmp  = '';
+		foreach($msg as $k => $v) {
+			$tmp = $Html->tag('strong', $k);
+			$tmp.= ' ';
+			$tmp.= nl2br($v);
+			$msgString.= $Html->tag("p", $tmp);
+		}
+		return $msgString;
 	}
 }
 ?>
