@@ -1,4 +1,5 @@
 <?php
+// @todo some exceptions thrown when shit goes wrong
 App::uses('CakeEmail', 'Utility/Network');
 class ContactsController extends ContactAppController {
 	var $name = 'Contacts';
@@ -64,29 +65,25 @@ class ContactsController extends ContactAppController {
 					return $this->render($this->action);
 			}
 			
-			// http://book.cakephp.org/2.0/en/core-utility-libraries/email.html?highlight=email#CakeEmail
-			
-			$message = $this->_mkMsg($this->request->data['Contact']);
-			
 			
 			$emailCfg = Configure::read('Contact.emailCfg') ? Configure::read('Contact.emailCfg') : 'default';
-			//diebug(Configure::read('Contact'));
 			
 			$email = new CakeEmail($emailCfg);
 			$email->from($this->data['Contact']['email'], $this->data['Contact'][$this->Contact->displayField])
 			    ->sender($this->_formSender)
-			    //->template('welcome', 'fancy')
+			    ->template(Configure::read('Contact.msgView'), Configure::read('Contact.msgLayout'))
 			    ->emailFormat(Configure::read('Contact.format'))
 			    ->replyTo($this->data['Contact']['email'])
 			    ->to(Configure::read('Contact.formTo'))
 			    ->subject(__d('contacts', 'New Contact'))
-			    ->send($message);
+			    ->viewVars($this->request->data['Contact'])
+			    ->send();
 	
 			$this->Session->setFlash(
 				__d('contacts', 'Your message was sent successfully.'),
 				'message_success');
 			
-			$this->Session->write('Message.email', $message);
+			$this->Session->write('Message.email', $this->request->data);
 	
 			$this->redirect(array('plugin' => 'contact', 'controller' => 'contacts', 'action' => 'thanks'));
 		} else {
@@ -121,20 +118,6 @@ class ContactsController extends ContactAppController {
 		  $action = APP . 'View' . DS . 'Contact' . DS . $this->action . '.ctp';
 		}
 		return parent::render($action, $layout);
-	}
-	
-	private function _mkMsg($msg) {
-		//diebug($msg);
-		$View = new View($this);
-		$Html = $View->loadHelper('Html');
-		$msgString = $tmp  = '';
-		foreach($msg as $k => $v) {
-			$tmp = $Html->tag('strong', $k);
-			$tmp.= ' ';
-			$tmp.= nl2br($v);
-			$msgString.= $Html->tag("p", $tmp);
-		}
-		return $msgString;
 	}
 }
 ?>
