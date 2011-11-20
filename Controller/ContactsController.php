@@ -12,7 +12,7 @@ class ContactsController extends ContactAppController {
 			$this->Auth->allowedActions = array('add', 'thanks');
 		}
 		
-		if(!Configure::read('App.defaultEmail') && !Confifure::read('Contact.formSender')) {
+		if(!Configure::read('App.defaultEmail') && !Configure::read('Contact.formSender')) {
 			$this->_formSender =  'noreply@' . env('HTTP_HOST');
 		} elseif(Configure::read('Contact.formSender')) {
 			$this->_formSender =  Configure::read('Contact.formSender');
