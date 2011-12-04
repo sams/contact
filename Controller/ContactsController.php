@@ -1,6 +1,7 @@
 <?php
 // @todo some exceptions thrown when shit goes wrong
 App::uses('CakeEmail', 'Utility/Network');
+App::uses('ContactAppController', 'Contact.Controller');
 class ContactsController extends ContactAppController {
 	var $name = 'Contacts';
 	private $_formSender = null;
