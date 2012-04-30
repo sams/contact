@@ -9,6 +9,8 @@ class M4ec85a76b5f04c9dba75558d85fa75eb extends CakeMigration {
  */
 	public $description = 'Contact Form Migration';
 
+	public $dependendOf = array();
+
 /**
  * Actions to be performed
  *
